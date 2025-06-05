@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from typing import List, Optional
 import uvicorn
@@ -34,6 +35,55 @@ class UploadResponse(BaseModel):
     message: str
     topics: List[str]
 
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    """Root endpoint with HTML documentation"""
+    return """
+    <html>
+        <head>
+            <title>LLM Study Buddy API</title>
+            <style>
+                body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+                h1 { color: #2c3e50; }
+                .endpoint { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; }
+                .method { color: #e74c3c; font-weight: bold; }
+                .url { color: #3498db; }
+                .description { color: #7f8c8d; }
+            </style>
+        </head>
+        <body>
+            <h1>Welcome to LLM Study Buddy API</h1>
+            <p>This API provides endpoints for personalized learning and teaching experiences.</p>
+            
+            <div class="endpoint">
+                <h2>Available Endpoints:</h2>
+                
+                <div class="endpoint">
+                    <p><span class="method">POST</span> <span class="url">/upload</span></p>
+                    <p class="description">Upload study notes for processing. Accepts PDF, images (PNG, JPG), and text files.</p>
+                </div>
+
+                <div class="endpoint">
+                    <p><span class="method">POST</span> <span class="url">/study</span></p>
+                    <p class="description">Handle study requests in either learning or teaching mode.</p>
+                </div>
+
+                <div class="endpoint">
+                    <p><span class="method">GET</span> <span class="url">/docs</span></p>
+                    <p class="description">Interactive API documentation (Swagger UI)</p>
+                </div>
+            </div>
+
+            <h2>Quick Start:</h2>
+            <ol>
+                <li>Visit <a href="/docs">/docs</a> for interactive API documentation</li>
+                <li>Use the /upload endpoint to upload your study notes</li>
+                <li>Use the /study endpoint to start learning or teaching sessions</li>
+            </ol>
+        </body>
+    </html>
+    """
+
 @app.post("/upload", response_model=UploadResponse)
 async def upload_notes(file: UploadFile = File(...)):
     """Upload study notes for processing"""
@@ -61,4 +111,4 @@ async def study(request: StudyRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True) 
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True) 
